@@ -1,3 +1,4 @@
+# %%
 from dash import html
 import colorlover
 
@@ -17,14 +18,15 @@ class dash_functions:
                 df_numeric_columns = df.select_dtypes('number')
         else:
             df_numeric_columns = df[columns]
+
         df_max = df_numeric_columns.max().max()
         df_min = df_numeric_columns.min().min()
-        ranges = [
-                ((df_max - df_min) * i) + df_min
-                for i in bounds
-                ]
+        
+        ranges = [((df_max - df_min) * i) + df_min for i in bounds]
+
         styles = []
         legend = []
+
         for i in range(1, len(bounds)):
             min_bound = ranges[i - 1]
             max_bound = ranges[i]
@@ -32,28 +34,43 @@ class dash_functions:
             color = 'white' if i > len(bounds) / 2. else 'inherit'
 
             for column in df_numeric_columns:
-                styles.append({
-                    'if': {
-                        'filter_query': (
-                            '{{{column}}} >= {min_bound}' +
-                            (' && {{{column}}} < {max_bound}' if (i < len(bounds) - 1) else '')
-                        ).format(column=column, min_bound=min_bound, max_bound=max_bound),
-                        'column_id': column
-                    },
-                    'backgroundColor': backgroundColor,
-                    'color': color
-                })
-            legend.append(
-                html.Div(style={'display': 'inline-block', 'width': '60px'}, children=[
-                    html.Div(
-                        style={
+                styles.append(
+                            {
+                            'if': {
+                                    'filter_query': (
+                                                    '{{{column}}} >= {min_bound}' + (' && {{{column}}} < {max_bound}' if (i < len(bounds) - 1) else '')
+                                                    ).format(column = column, min_bound = min_bound, max_bound = max_bound),
+                                    'column_id': column
+                                },
                             'backgroundColor': backgroundColor,
-                            'borderLeft': '1px rgb(50, 50, 50) solid',
-                            'height': '10px'
-                        }
-                    ),
-                    html.Small(round(min_bound, 2), style={'paddingLeft': '2px'})
-                ])
-            )
+                            'color': color
+                            }
+                            )
+            legend.append(
+                        html.Div(style={'display': 'inline-block', 'width': '60px'}, 
+                                 children = [
+                                            html.Div(
+                                                    style = {
+                                                            'backgroundColor': backgroundColor,
+                                                            'borderLeft': '1px rgb(50, 50, 50) solid',
+                                                            'height': '10px'
+                                                            }
+                                                    ),
+                                            html.Small(round(min_bound, 2), style={'paddingLeft': '2px'})
+                                            ]
+                                )
+                        )
 
         return (styles, html.Div(legend, style={'padding': '5px 0 5px 0'}))
+    
+
+
+if __name__ == '__main__':
+    
+    
+    import pandas as pd
+    data = pd.read_pickle("/Users/trey/Desktop/Python Projects/Fantasy Basketball/Dashboard/data/player_data.pkl")
+
+    test_fuction = dash_functions()
+
+    #test_fuction.discrete_background_color_bins(data)
